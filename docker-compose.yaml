@@ -1,0 +1,31 @@
+
+version: "3"
+services:
+  server:
+    image: server
+    container_name: server
+    build: ./server
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongodb
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    restart: always
+    ports:
+      - '27017:27017'
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=user
+      - MONGO_INITDB_ROOT_PASSWORD=user
+    volumes:
+      - ./mongo_data:/data/db
+  client:
+    image: client
+    container_name: client
+    build: ./client
+    restart: always
+    ports:
+      - "3001:3001"      
+ 

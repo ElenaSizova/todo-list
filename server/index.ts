@@ -8,10 +8,10 @@ import { Http } from './http';
 const app = express()
 app.use(express.urlencoded());
 app.use(cors({
-    origin: 'http://localhost:3001'
+    origin: '*'
   }));
 
-const connectionString = 'mongodb://user:user@localhost:27017';
+const connectionString = 'mongodb://user:user@mongodb:27017';
 const client = new MongoClient(connectionString);
 client.connect();
 
