@@ -1,0 +1,21 @@
+.root {
+    padding: 24px;
+}
+
+.content {
+    display: flex;
+}
+
+.input {
+    flex: 1;
+
+    border: 2px solid #b6b8da;
+    border-radius: 4px;
+    padding: 8px 16px;
+}
+
+.button {
+    margin-left: 24px;
+    padding: 16px;
+    min-width: 100px;
+}

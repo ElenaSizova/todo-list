@@ -1,0 +1,35 @@
+.root {
+    border: 1px solid grey;
+    border-radius: 6px;
+
+    background-color: #fff;
+
+    width: 600px;
+    margin: 64px auto;
+}
+
+.header {
+    font-size: 24px;
+    font-weight: bold;
+    padding: 36px 0;
+    text-align: center;
+    border-bottom: 1px dotted #666;
+}
+
+.tasks {
+    min-height: 400px;
+}
+
+.footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    border-top: 1px dotted #666;
+    min-height: 30px;
+}
+
+.complete {
+    cursor: pointer;
+    color: blue
+}

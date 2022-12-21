@@ -1,0 +1,14 @@
+.root {
+    display: flex;
+
+    cursor: pointer;
+    padding: 16px 24px;
+}
+
+.root:focus {
+    background-color: rgba(grey, 0.8);
+}
+
+.content {
+    margin-left: 8px;
+}
