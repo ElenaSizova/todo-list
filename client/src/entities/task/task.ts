@@ -21,9 +21,9 @@ export type TaskState = {
 
 
 const taskEntity = new schema.Entity<Task>('tasks', {}, {
-    idAttribute: '_id',
+    idAttribute: 'id',
     processStrategy: item => ({
-        id: item._id,
+        id: item.id,
         content: item.content,
         isCompleted: item.isCompleted,
         listId: item.listId

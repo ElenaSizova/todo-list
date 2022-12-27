@@ -1,13 +1,25 @@
 import { ObjectId, Db } from 'mongodb'
-import { ListId, TaskId, Task } from './entities'
+import { 
+    ListId,
+    TaskId,
+    Task,
+    TaskIdMongoDB,
+    ListIdMongoDB,
+    TaskMongoDB,
+    fromMongoDBTaskId,
+    toMongoDBTaskId,
+    fromMongoDBListId,
+    toMongoDBListId,
+    fromMongoDBTask
+} from './entities'
 
 export interface RepositoryInterface {
     createList: () => Promise<ListId>,
-    createTask: ({listId, content}: {listId: string | ObjectId, content: string}) => Promise<TaskId>,
-    getTasksByListId: ({listId}: {listId: string})  => Promise<Task[]>,
-    getTask: (taskId: {taskId: string}) =>  Promise<Task | null>,
-    updateTask: ({taskId, isCompleted}: {taskId: string, isCompleted: boolean}) => Promise<TaskId>,
-    completeTasksByListId: ({listId}: {listId: string})  => Promise<{}>,
+    createTask: ({listId, content}: {listId: ListId, content: string}) => Promise<TaskId>,
+    getTasksByListId: ({listId}: {listId: ListId})  => Promise<Task[]>,
+    getTask: (taskId: {taskId: TaskId}) =>  Promise<Task | null>,
+    updateTask: ({taskId, isCompleted}: {taskId: TaskId, isCompleted: boolean}) => Promise<number>,
+    completeTasksByListId: ({listId}: {listId: ListId})  => Promise<number>,
 }
 
 export class RepositoryMongoDB implements RepositoryInterface {
@@ -17,27 +29,39 @@ export class RepositoryMongoDB implements RepositoryInterface {
         this.db = db;
     }
 
-    async createList() {
-        return (await this.db.collection("list").insertOne({})).insertedId;
+    async createList(): Promise<ListId> {
+        const listId:ListIdMongoDB = (await this.db.collection("list").insertOne({})).insertedId;
+
+        return fromMongoDBListId(listId);
     }
 
-    async createTask({content, listId}: {listId: string | ObjectId, content: string}) {
-        return (await this.db.collection("tasks").insertOne({ content, listId, isCompleted: false })).insertedId;
+    async createTask({content, listId}: {listId: ListId, content: string}): Promise<TaskId>{
+        const taskId:TaskIdMongoDB = (await this.db.collection("tasks").insertOne({ content, listId: toMongoDBListId(listId), isCompleted: false })).insertedId;
+
+        return fromMongoDBTaskId(taskId);
     }
 
-    async getTasksByListId({listId}: {listId: string}) {
-        return await this.db.collection("tasks").find<Task>({listId: { $in: [listId, new ObjectId(listId)]}}).toArray();
+    async getTasksByListId({listId}: {listId: ListId}): Promise<Task[]> {
+        const tasks = await this.db.collection("tasks").find<TaskMongoDB>({listId: toMongoDBListId(listId)}).toArray();
+
+        return tasks.map(t => fromMongoDBTask(t));
     }
 
-    async getTask({taskId}: {taskId: string}) {
-        return await this.db.collection("tasks").findOne<Task>({"_id" : new ObjectId(taskId)})
+    async getTask({taskId}: {taskId: TaskId}):Promise<Task | null> {
+        const task = await this.db.collection("tasks").findOne<TaskMongoDB>({"_id" : toMongoDBTaskId(taskId)})
+
+        if (task === null) {
+            return null;
+        }
+
+        return fromMongoDBTask(task);
     }
 
-    async updateTask({taskId, isCompleted}: {taskId: string, isCompleted: boolean}) {
-        return (await this.db.collection("tasks").updateOne({"_id" : new ObjectId(taskId)}, { $set: {isCompleted }})).upsertedId
+    async updateTask({taskId, isCompleted}: {taskId: TaskId, isCompleted: boolean}): Promise<number> {
+        return (await this.db.collection("tasks").updateOne({"_id" : toMongoDBTaskId(taskId)}, { $set: {isCompleted }})).modifiedCount;
     }
 
-    async completeTasksByListId({listId}: {listId: string}) {
-        return await this.db.collection("tasks").updateMany({listId: { $in: [listId, new ObjectId(listId)]}}, { $set: {isCompleted: true }});
+    async completeTasksByListId({listId}: {listId: ListId}): Promise<number> {
+        return (await this.db.collection("tasks").updateMany({listId: toMongoDBListId(listId)}, { $set: {isCompleted: true }})).modifiedCount;
     }
 }

@@ -1,7 +1,16 @@
 import { Express, Request, Response } from 'express';
-import { ServiceInterface } from "./service";
+import { ServiceInterface, QueryStatus } from "./service";
 
 const port = 3000
+
+const toHttpStatus = (serviceStatus: QueryStatus): number => {
+    switch (serviceStatus){
+        case QueryStatus.SUCCESS: { return 200};
+        case QueryStatus.INVALID_DATA: { return 400};
+        case QueryStatus.NOT_FOUND: { return 404};
+        default: {return 500}
+    }
+}
 
 export class Http {
     service: ServiceInterface;
@@ -36,7 +45,7 @@ export class Http {
             const content = req.body.content;    
             const result =  await this.service.createList({content});
         
-            res.status(result.status).json(result.data)
+            res.status(toHttpStatus(result.status)).json(result.data)
             }
         catch (e) {
             res.status(500).json({error: e})
@@ -49,7 +58,7 @@ export class Http {
             const content = req.body.content;
             const result =  await this.service.createTask({listId, content});
     
-            res.status(result.status).json(result.data)
+            res.status(toHttpStatus(result.status)).json(result.data)
         }
         catch (e) {
             res.status(500).json({error: e})
@@ -62,7 +71,7 @@ export class Http {
     
             const result =  await this.service.getTasksByListId({listId});
     
-            res.status(200).json(result)
+            res.status(toHttpStatus(result.status)).json(result.data)
         }
         catch (e) {
             res.status(500).json({error: e})
@@ -74,7 +83,7 @@ export class Http {
             const taskId = req.params.taskId;
             const result =  await this.service.getTask({taskId});
     
-            res.status(result.status).json(result.data)
+            res.status(toHttpStatus(result.status)).json(result.data)
           }
         catch (e) {
             res.status(500).json({error: e})
@@ -87,8 +96,8 @@ export class Http {
             const isCompleted = req.body.isCompleted === "true";
             
             const result =  await this.service.updateTask({taskId, isCompleted});
-    
-            res.status(result.status).json(result.data)
+
+            res.status(toHttpStatus(result.status)).json(result.data)
           }
         catch (e) {
             res.status(500).json({error: e})
@@ -100,10 +109,10 @@ export class Http {
             const listId = req.params.listId;
             
             const result =  await this.service.completeTasksByListId({listId});
-    
-            res.status(result.status).json(result.data)
+
+            res.status(toHttpStatus(result.status)).json(result.data)
           }
-        catch (e) {
+        catch (e) {console.log(e);
             res.status(500).json({error: e})
         } 
     }

@@ -5,18 +5,20 @@ import { RepositoryMongoDB } from './repository'
 import { Service } from './service';
 import { Http } from './http';
 
-const app = express()
-app.use(express.urlencoded());
-app.use(cors({
-    origin: '*'
-  }));
+(async function start() {
+  const app = express()
+  app.use(express.urlencoded());
+  app.use(cors({
+      origin: '*'
+    }));
 
-const connectionString = 'mongodb://user:user@mongodb:27017';
-const client = new MongoClient(connectionString);
-client.connect();
+  const connectionString = 'mongodb://user:user@mongodb:27017';
+  const client = new MongoClient(connectionString);
+  await client.connect();
 
-const db = client.db("test");
-const repo = new RepositoryMongoDB(db);
-const service = new Service(repo);
-const http = new Http(service, app);
-http.listen();
+  const db = client.db("test");
+  const repo = new RepositoryMongoDB(db);
+  const service = new Service(repo);
+  const http = new Http(service, app);
+  http.listen();
+}())
